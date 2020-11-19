@@ -3,6 +3,7 @@ import './globals';
 import "p5/lib/addons/p5.sound";
 import * as p5 from "p5";
 import audio from '../audio/strings-no-1.mp3'
+//import audio from '../audio/donuts-no-1.mp3'
 
 
 const P5Sketch = () => {
@@ -19,7 +20,13 @@ const P5Sketch = () => {
 
         p5.tempo = 106;
 
-        p5.nextBar = 0;
+        p5.nextSemiQuaver = 5;
+
+        p5.melodyIndex = 0;
+
+        p5.melodyArray = [5,3,4,4,5,3,4,4];
+
+        p5.numOfStringLoops = 300;
 
         p5.nx = p5.random(100);
         p5.ny = p5.random(100);
@@ -56,16 +63,21 @@ const P5Sketch = () => {
                     p5.canvas.addClass('fade-out');
                 }
                 p5.playStrings();
-                if (currentBar == p5.nextBar) {
-                    p5.nextBar++;
-                    if (p5.nz > 0.5) {
-                        p5.nz = 0;
-                        p5.nx = p5.random(100);
-                        p5.ny = p5.random(100);
-                        p5.ox = p5.random(p5.canvasWidth);
-                        p5.oy = p5.random(p5.canvasHeight);
-                        p5.h = p5.random(360);
+                console.log('currentBar');
+                console.log(currentBar);
+                if (currentBar === p5.nextSemiQuaver) {
+                    p5.melodyIndex++;
+                    if (p5.melodyIndex === p5.melodyArray.length){
+                        p5.melodyIndex = 0;
                     }
+                    p5.nextSemiQuaver = p5.nextSemiQuaver + p5.melodyArray[p5.melodyIndex]; 
+                    p5.numOfStringLoops = p5.numOfStringLoops + 10;
+                    p5.nz = 0;
+                    p5.nx = p5.random(100);
+                    p5.ny = p5.random(100);
+                    p5.ox = p5.random(p5.canvasWidth);
+                    p5.oy = p5.random(p5.canvasHeight);
+                    p5.h = p5.random(360);
                     p5.h++;
                 }
                 
@@ -78,7 +90,9 @@ const P5Sketch = () => {
             p5.stroke(p5.h % 360, 100, 100, 50);
 
             p5.beginShape();
-            const numOfLoops = 500;
+            const numOfLoops = p5.numOfStringLoops;
+            //const numOfLoops = p5.random(400, 800);
+            
             const circleSize = p5.canvasHeight / 256;
             for (let i = 0; i < numOfLoops; i++) {
                 let x = p5.map(p5.noise(i * 0.01, p5.nx, p5.nz), 0, 1, p5.ox - numOfLoops, p5.ox + numOfLoops);
@@ -91,6 +105,7 @@ const P5Sketch = () => {
             console.log('ednShape');
 
             p5.nz += 0.005;
+            
 
             // if (p5.nz > 0.5) {
             //     p5.nz = 0;
@@ -105,7 +120,7 @@ const P5Sketch = () => {
 
         p5.getSongBar = () => {
             if (p5.song && p5.song.buffer){
-                const beatPerBar = 1;
+                const beatPerBar = 0.5;
                 const barAsBufferLength = (p5.song.buffer.sampleRate * 60 / p5.tempo) * beatPerBar;
                 return Math.floor(p5.song._lastPos / barAsBufferLength);
             }
